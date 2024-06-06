@@ -1,3 +1,8 @@
+import sys
+
+height = int(sys.argv[1])
+width = int(sys.argv[2])
+
 # Geneate config
 xml = """<?xml version="1.0"?>
 <OSPFASConfig xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="OSPF.xsd">
@@ -5,8 +10,6 @@ xml = """<?xml version="1.0"?>
   <!-- Areas -->
   <Area id="0.0.0.0">
 """
-height = 4
-width = 6
 R1 = "R1"
 N1 = "N1"
 # N[i*width+j].ethg[0] <--> C <--> R[(i*width+j)*2].ethg[0];

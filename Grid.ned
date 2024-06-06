@@ -12,8 +12,8 @@ network Grid
 {
     parameters:
         @display("p=10,10;b=736,568");
-        int height @prompt("Number of rows") = default(4);
-        int width @prompt("Number of columns") = default(6);
+        int height @prompt("Number of rows") = default(20);
+        int width @prompt("Number of columns") = default(20);
     types:
         channel C extends ThruputMeteringChannel
         {

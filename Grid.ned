@@ -12,8 +12,8 @@ network Grid
 {
     parameters:
         @display("p=10,10;b=736,568");
-        int height @prompt("Number of rows") = default(20);
-        int width @prompt("Number of columns") = default(20);
+        int height @prompt("Number of rows") = default(5);
+        int width @prompt("Number of columns") = default(5);
     types:
         channel C extends ThruputMeteringChannel
         {
@@ -30,7 +30,7 @@ network Grid
         }
         R[height*width*2]: OspfRouter {
             parameters:
-                @display("p=,,m,$width");
+//                @display("p=,,m,$width");
             gates:
                 ethg[2];
         }

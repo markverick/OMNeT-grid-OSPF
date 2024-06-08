@@ -8,8 +8,8 @@ network = GridCompact
 sim-time-limit = 200s
 **.vector-recording = false
 
-**.height=6
-**.width=6
+**.height=<height>
+**.width=<width>
 
 **.ospf.ospfConfig = xmldoc("ASConfig.xml")
 

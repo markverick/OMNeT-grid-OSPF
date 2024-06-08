@@ -12,12 +12,12 @@ network Grid
 {
     parameters:
         @display("p=10,10;b=736,568");
-        int height @prompt("Number of rows") = default(5);
-        int width @prompt("Number of columns") = default(5);
+        int height @prompt("Number of rows") = default(3);
+        int width @prompt("Number of columns") = default(3);
     types:
         channel C extends ThruputMeteringChannel
         {
-            delay = 0.1us;
+            delay = 10ms;
             datarate = 100Mbps;
             thruputDisplayFormat = "#N";
         }

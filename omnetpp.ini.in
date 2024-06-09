@@ -25,3 +25,10 @@ sim-time-limit = 200s
 
 **.arp.cacheTimeout = 1s
 
+[Config static]
+description = static topology
+*.scenarioManager.script = xml("<empty/>")
+
+[Config linkfail]
+description = connect/disconnect link (dynamic topology)
+*.scenarioManager.script = xmldoc("scenarios/LinkUpdate-<height>x<width>.xml")

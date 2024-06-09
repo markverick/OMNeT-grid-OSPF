@@ -36,14 +36,14 @@ def main():
             packet_counts = extract_packet_counts(filename)
             if packet_counts:
                 average_packet_count = sum(packet_counts) / len(packet_counts)
-                N_values.append(N)
+                N_values.append(N*N)
                 averages.append(average_packet_count)
     
     plt.figure(figsize=(10, 6))
     plt.plot(N_values, averages, marker='o')
-    plt.xlabel('N')
+    plt.xlabel('NxN')
     plt.ylabel('Average Packet Count')
-    plt.title('Average Packet Count vs. N')
+    plt.title('Average Packet Count vs. NxN')
     plt.grid(True)
     plt.savefig('average_packet_count.png')
     plt.show()

@@ -10,14 +10,15 @@ def get_max_N(directory):
             N_values.append(int(match.group(1)))
     return max(N_values) if N_values else None
 
-def extract_packet_counts(filename):
-    packet_counts = []
+def extract_bytes(filename):
+    num_bytes = []
     with open(filename, 'r') as file:
         for line in file:
-            match = re.match(r'scalar GridCompact\.R\[\d+\]\.ethernet encapPk:count (\d+)', line)
+            match = re.match(r'scalar GridCompact\.R\[\d+\]\.eth\[\d+\]\.mac txPk:sum\(packetBytes\) (\d+)', line)
             if match:
-                packet_counts.append(int(match.group(1)))
-    return packet_counts
+                num_bytes.append(int(match.group(1)))
+                # print(int(match.group(1)))
+    return num_bytes
 
 def main():
     directory = "../"
@@ -33,19 +34,19 @@ def main():
     for N in range(1, max_N + 1):
         filename = f"../results-{N}x{N}/General-#0.sca"
         if os.path.isfile(filename):
-            packet_counts = extract_packet_counts(filename)
-            if packet_counts:
-                total_packet_count = sum(packet_counts)
+            num_bytes = extract_bytes(filename)
+            if num_bytes:
+                total_packet_count = sum(num_bytes) / len(num_bytes)
                 N_values.append(N*N)
                 totals.append(total_packet_count)
     
     plt.figure(figsize=(10, 6))
     plt.plot(N_values, totals, marker='o')
     plt.xlabel('NxN')
-    plt.ylabel('Total Packet Count')
-    plt.title('Total Packet Count vs. NxN')
+    plt.ylabel('Total Bytes')
+    plt.title('Total Bytes vs. NxN')
     plt.grid(True)
-    plt.savefig('total_packet_count.png')
+    plt.savefig('total_bytes.png')
     plt.show()
 
 if __name__ == "__main__":

@@ -3,7 +3,7 @@
 # Function to run a command in a new screen
 run_in_screen() {
     local N=$1
-    screen -dmS "grid-$N" bash -c "python3 run-grid.py $N $N"
+    screen -dmS "grid-$N" bash -c "python3 run-grid.py $N $N linkfail"
 }
 
 # TODO: add source setenv

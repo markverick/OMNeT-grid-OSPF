@@ -1,6 +1,8 @@
 import sys
 import subprocess
 import os
+import numpy as np
+
 def replace_placeholders_in_file(input_file: str, output_file: str, height: int, width: int) -> None:
     """
     Reads the input file, replaces <width> and <height> placeholders with the provided values,
@@ -69,22 +71,76 @@ def gen_as_config_compact(height, width):
       print(xml, file=file)  # Python 3.x
       file.flush()
       os.fsync(file.fileno())
+      
+# Generate link fail events 
+def gen_one_event(time, duration, src, src_if, dst, dst_if):
+  recover_time = str(int(time + duration))
+  time = str(int(time))
+  src_if = str(src_if)
+  dst_if = str(dst_if)
+  xml = "    <at t=\"" + time + "us\">\n"
+  xml += "        <disconnect src-module=\"" + src + "\" src-gate=\"ethg$o[" + src_if + "]\" />\n"
+  xml += "        <disconnect src-module=\"" + dst + "\" src-gate=\"ethg$o[" + dst_if + "]\" />\n"
+  xml += "    </at>\n"
+  xml += "    <at t=\"" + recover_time + "us\">\n"
+  xml += "        <connect src-module=\"" + src + "\" src-gate=\"ethg[" + src_if + "]\"\n"
+  xml += "                 dest-module=\"" + dst + "\" dest-gate=\"ethg[" + dst_if + "]\"\n"
+  xml += "                 channel-type=\"inet.common.misc.ThruputMeteringChannel\">\n"
+  xml += "            <param name=\"delay\" value=\"10ms\" />\n"
+  xml += "            <param name=\"datarate\" value=\"100Mbps\" />\n"
+  xml += "            <param name=\"thruputDisplayFormat\" value=\'\"#N\"\' />\n"
+  xml += "        </connect>\n"
+  xml += "    </at>\n"
+  return xml
+
+def gen_events_one_link(src, src_if, dst, dst_if, mean, variance, duration, stop_time, prob):
+  (alpha, x_m) = prob
+  current_time = 100 * 1000000 # start at 100 seconds
+  xml = ""
+  while current_time <= stop_time:
+    xml += gen_one_event(current_time, duration, src, src_if, dst, dst_if)
+    current_time += duration + (np.random.pareto(alpha) + 1) * x_m
+  return xml
+
+def gen_link_update(height, width):
+  xml = "<scenario>\n"
+  for i in range(height):
+    for j in range(width):
+      src = "R" + str(i*width+j)
+      src_if = 0
+      dst = "R" + str(i*width+(j+1)%width)
+      dst_if =2
+      xml += gen_events_one_link(src, src_if, dst, dst_if, mean=4 * 1000000, variance=2 * 1000000, duration=3, prob=(2, 10 * 1000000),stop_time=200 * 1000000)
+  xml += "</scenario>\n"
+  return xml
+
 
 # Example usage
 input_file_path = "omnetpp.ini.in"
 output_file_path = "omnetpp.ini"
-if len(sys.argv) < 2:
-    print("arguments: width height")
+if len(sys.argv) < 3:
+    print("arguments: <width> <height> [config](static, linkfail)")
 else:
     height = int(sys.argv[1])
     width = int(sys.argv[2])
+    if len(sys.argv) == 3:
+        config = "static"
+    else:
+        config = sys.argv[3]
+    
+    if (config == "linkfail"):
+        xml = gen_link_update(height, width)
+        with open('scenarios/LinkUpdate-' + str(height) + 'x' + str(width) + '.xml', 'w') as file:
+            print(xml, file=file)  # Python 3.x
+            file.flush()
+            os.fsync(file.fileno())
 
     replace_placeholders_in_file(input_file_path, output_file_path, width, height)
 
     gen_as_config_compact(height, width)
 
     try:
-        subprocess.run(["inet","-u","Cmdenv","--result-dir=results-" + str(height) + "x" + str(width)])
+        subprocess.run(["inet","-u","Cmdenv","--result-dir=results/" + str(height) + "x" + str(width), "-c", config])
         #result = subprocess.run(["inet","-u","Cmdenv","--result-dir=results-" + str(height) + "x" + str(width)], capture_output=True, text=True, check=True)
         #with open("results-" + str(height) + "x" + str(width) + "/out.log", 'w') as file:
         #    file.write(result.stdout)

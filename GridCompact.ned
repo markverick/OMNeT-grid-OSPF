@@ -2,6 +2,7 @@
 package inet.examples.ospfv2.grid;
 
 import inet.common.misc.ThruputMeteringChannel;
+import inet.common.scenario.ScenarioManager;
 import inet.networklayer.configurator.ipv4.Ipv4NetworkConfigurator;
 import inet.node.ethernet.EthernetSwitch;
 import inet.node.inet.StandardHost;
@@ -35,6 +36,9 @@ network GridCompact
                 addStaticRoutes = false;
                 addDefaultRoutes = false;
                 @display("p=100,100;is=s");
+        }
+        scenarioManager: ScenarioManager {
+            @display("p=100,200;is=s");
         }
     connections:
         for i=0..height-1, for j=0..width-1 {

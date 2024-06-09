@@ -12,7 +12,7 @@ run_in_screen() {
 running_screens=()
 
 # Main loop to run screens
-for i in $(seq 1 8); do
+for i in $(seq 2 8); do
     # Run the screen and add its ID to the array
     run_in_screen $i
     running_screens+=($i)

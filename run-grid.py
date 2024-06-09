@@ -67,7 +67,7 @@ def gen_as_config_compact(height, width):
     xml += "  </Router>\n"
   xml += "</OSPFASConfig>"
   # print(xml)
-  with open('ASConfig.xml', 'w') as file:
+  with open('scenarios/ASConfig-' + str(height) + 'x' + str(width) + '.xml', 'w') as file:
       print(xml, file=file)  # Python 3.x
       file.flush()
       os.fsync(file.fileno())
@@ -93,24 +93,34 @@ def gen_one_event(time, duration, src, src_if, dst, dst_if):
   xml += "    </at>\n"
   return xml
 
-def gen_events_one_link(src, src_if, dst, dst_if, mean, variance, duration, stop_time, prob):
-  (alpha, x_m) = prob
+# Use Pareto distribution
+def gen_events_one_link(src, src_if, dst, dst_if, stop_time):
+  prob_fail = (2, 10 * 1000000) # (alpha, x_m)
+  prob_recover = (2, 1 * 1000000) # (alpha, x_m)
   current_time = 100 * 1000000 # start at 100 seconds
   xml = ""
+  current_time += (np.random.pareto(prob_fail[0]) + 1) * prob_fail[1]
   while current_time <= stop_time:
+    duration = (np.random.pareto(prob_recover[0]) + 1) * prob_recover[1]
     xml += gen_one_event(current_time, duration, src, src_if, dst, dst_if)
-    current_time += duration + (np.random.pareto(alpha) + 1) * x_m
+    current_time += duration + (np.random.pareto(prob_fail[0]) + 1) * prob_fail[1]
   return xml
 
 def gen_link_update(height, width):
   xml = "<scenario>\n"
   for i in range(height):
     for j in range(width):
-      src = "R" + str(i*width+j)
+      src = "R[" + str(i*width+j) + "]"
       src_if = 0
-      dst = "R" + str(i*width+(j+1)%width)
-      dst_if =2
-      xml += gen_events_one_link(src, src_if, dst, dst_if, mean=4 * 1000000, variance=2 * 1000000, duration=3, prob=(2, 10 * 1000000),stop_time=200 * 1000000)
+      dst = "R[" + str(i*width+(j+1)%width) + "]"
+      dst_if = 2
+      xml += gen_events_one_link(src, src_if, dst, dst_if, stop_time=200 * 1000000)
+      
+      src = "R[" + str(i*width+j) + "]"
+      src_if = 1
+      dst = "R[" + str(((i+1)%height)*width+j) + "]"
+      dst_if = 3
+      xml += gen_events_one_link(src, src_if, dst, dst_if, stop_time=200 * 1000000)
   xml += "</scenario>\n"
   return xml
 
